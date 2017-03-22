@@ -1,0 +1,10 @@
+name: doorplugin
+main: net.toolan.doorplugin.doorplugin
+version: 1.1
+author: beobab
+commands:
+  door:
+    description: This is the generic door command. Use it to create block doors!
+    usage: /door create
+    permission: doorplugin.basic
+    permission-message: You don't have permission to create doors.
