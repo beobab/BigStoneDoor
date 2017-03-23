@@ -30,6 +30,7 @@ The door can be opened and closed by pressing the button at x,y,z
 It is replaced by AIR when it opens.  
 This door can be opened by <owner [,other_player]>  
 
+```
 Name        : <name>
 Owner       : <player>
 ------------ -------------------------------
@@ -47,13 +48,17 @@ Locked      : UNLOCKED | LOCKED | AUTOLOCK
 
 Allow List  : (everyone)
 Deny List   : (no-one)
+```
 
 (ops can see all doors - otherwise you see doors you have permissions to)
+
 /door list
+```
 Name                     Owner
 ------------------------ --------------------
 mountainway              LiztherWiz
 dragondoors              Minecraft_101
+```
 
 MVP: 
 ----
