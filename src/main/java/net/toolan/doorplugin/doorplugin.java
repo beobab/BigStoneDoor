@@ -9,9 +9,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +20,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 
 public final class doorplugin extends JavaPlugin implements Listener {
@@ -135,7 +137,7 @@ public final class doorplugin extends JavaPlugin implements Listener {
 
             if (DEBUG) sender.sendMessage(Integer.toString(args.length) + " arguments");
 
-            SubCommand subCmd = GetSubCommand(args);
+            DoorSubCommand subCmd = GetSubCommand(args);
 
             if (DEBUG) {
                 if (subCmd == null) {
@@ -157,12 +159,12 @@ public final class doorplugin extends JavaPlugin implements Listener {
                 }
             }
 
-            if (subCmd == SubCommand.Demo) {
+            if (subCmd == DoorSubCommand.Demo) {
                 if (player != null)
                     _allDoors.DemoDoor(player);
             }
 
-            if (subCmd == SubCommand.List) {
+            if (subCmd == DoorSubCommand.List) {
                 sender.sendMessage(_allDoors.ListDoors());
             }
 
@@ -241,34 +243,19 @@ public final class doorplugin extends JavaPlugin implements Listener {
     }
 
 
-    public enum SubCommand {
-        Create,
-        Demo,
-        Open,
-        Close,
-        Location,
-        Size,
-        Style,
-        Direction,
-        Delay,
-        Info,
-        List,
-        Delete,
-        SetTrigger,
-        Usage
-    }
 
-    public SubCommand GetSubCommand(String[] args) {
-        if (args.length == 0) return SubCommand.Usage;
-        if (MatchesCommand(args, "demo", 1)) return SubCommand.Demo;
-        if (MatchesCommand(args, "list", 1)) return SubCommand.List;
-        if (MatchesCommand(args, "open", 2)) return SubCommand.Open;
-        if (MatchesCommand(args, "close", 2)) return SubCommand.Close;
-        if (MatchesCommand(args, "info", 2)) return SubCommand.Info;
-        if (MatchesCommand(args, "create", 2)) return SubCommand.Create;
-        if (MatchesCommand(args, "trigger", 1)) return SubCommand.SetTrigger;
 
-        return SubCommand.Usage;
+    public DoorSubCommand GetSubCommand(String[] args) {
+        if (args.length == 0) return DoorSubCommand.Usage;
+        if (MatchesCommand(args, "demo", 1)) return DoorSubCommand.Demo;
+        if (MatchesCommand(args, "list", 1)) return DoorSubCommand.List;
+        if (MatchesCommand(args, "open", 2)) return DoorSubCommand.Open;
+        if (MatchesCommand(args, "close", 2)) return DoorSubCommand.Close;
+        if (MatchesCommand(args, "info", 2)) return DoorSubCommand.Info;
+        if (MatchesCommand(args, "create", 2)) return DoorSubCommand.Create;
+        if (MatchesCommand(args, "trigger", 1)) return DoorSubCommand.SetTrigger;
+
+        return DoorSubCommand.Usage;
     }
 
     private boolean MatchesCommand(String[] args, String name, int minimumNumberOfArguments) {
@@ -276,23 +263,23 @@ public final class doorplugin extends JavaPlugin implements Listener {
         if (args[0].equalsIgnoreCase(name)) return true;
         return false;
     }
-    private CommandArguments ParseArguments(final String[] args, SubCommand subCommand) {
+    private CommandArguments ParseArguments(final String[] args, DoorSubCommand subCommand) {
 
-        if (subCommand == SubCommand.List) {
+        if (subCommand == DoorSubCommand.List) {
             return new CommandArguments();
         }
 
-        else if (subCommand == SubCommand.Info
-              || subCommand == SubCommand.Open
-              || subCommand == SubCommand.Close
-              || subCommand == SubCommand.SetTrigger) {
+        else if (subCommand == DoorSubCommand.Info
+              || subCommand == DoorSubCommand.Open
+              || subCommand == DoorSubCommand.Close
+              || subCommand == DoorSubCommand.SetTrigger) {
             final String aName = ArgumentAt(args, 1, "" );
             return new CommandArguments() {{
                 doorName = aName;
             }};
         }
 
-        else if (subCommand == SubCommand.Create) {
+        else if (subCommand == DoorSubCommand.Create) {
             final String aName = ArgumentAt(args, 1, "" );
             final DoorSize ds = new DoorSize(
                     ArgumentIntAt(args, 2, 5),
@@ -459,6 +446,8 @@ class AllDoors {
                     workingBlock.setZ(z);
 
                     Block b = w.getBlockAt(workingBlock);
+
+                    // Not sure of ordering here...
                     b.setData(material.getData());
                     b.setType(material.getItemType());
                     b.setData(material.getData());
@@ -726,6 +715,80 @@ class BigDoor {
         _root = root;
         Size = d;
     }
+
+    public String CurrentMaterial() {
+        // start in one corner, and loop through trying to find the biggest chunk of the same material. Data counts as different material.
+        List<Block> blocks = GetDoorBlocks();
+        blocks.add(Trigger);
+
+        return null;
+    }
+
+    private List<Block> GetDoorBlocks() {
+        double rootX = _root.getX();
+        double rootY = _root.getY();
+        double rootZ = _root.getZ();
+
+        int xMult = (Size.X < 0 ? -1 : +1);
+        int yMult = (Size.Y < 0 ? -1 : +1);
+        int zMult = (Size.Z < 0 ? -1 : +1);
+
+        int xMax = Math.abs(Size.X);
+        int yMax = Math.abs(Size.Y);
+        int zMax = Math.abs(Size.Z);
+
+        List<Block> lst = new ArrayList<>();
+
+        Location workingBlock = _root.clone();
+        for (int x = 0; x < xMax; x++) {
+            workingBlock.setX(rootX + (x * xMult));
+            for (int y = 0; y < yMax; y++) {
+                workingBlock.setY(rootY + (y * yMult));
+                for (int z = 0; z < zMax; z++) {
+                    workingBlock.setZ(rootZ + (z * zMult));
+
+                    lst.add(_world.getBlockAt(workingBlock));
+                }
+            }
+        }
+        return lst;
+    }
+
+    @SuppressWarnings("deprecation")
+    public String SerialiseBlock(Block b) {
+        Location l = b.getLocation();
+        String location =
+                Integer.toString(l.getBlockX()) + "," +
+                Integer.toString(l.getBlockY()) + "," +
+                Integer.toString(l.getBlockZ());
+
+        Material m = b.getType();
+        Byte data = b.getData();
+        return location + "|" + m.toString() + (data > 0 ? "," + data.toString() : "");
+    }
+
+    @SuppressWarnings("deprecation")
+    public Block DeserialiseBlock(World w, String s) {
+
+        return null;
+    }
+
+    public static String compress(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(out);
+            gzip.write(str.getBytes());
+            gzip.close();
+            return out.toString("UTF8");
+        } catch (Exception ex){
+            return str; // can't compress it. :(
+        }
+    }
+
 
     public String Info() {
         return "Name        : " + Name + "\n" +

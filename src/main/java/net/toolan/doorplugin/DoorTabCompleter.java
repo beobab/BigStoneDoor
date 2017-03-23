@@ -28,7 +28,7 @@ public class DoorTabCompleter implements TabCompleter {
         if (args.length == 1) {
             String partial = args[0];
             List<String> lst = new ArrayList<>();
-            for (doorplugin.SubCommand cmd : doorplugin.SubCommand.values()) {
+            for (DoorSubCommand cmd : DoorSubCommand.values()) {
                 String item = cmd.toString();
                 if (item.startsWith(partial))
                     lst.add(item);
