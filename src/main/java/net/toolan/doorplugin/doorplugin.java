@@ -718,10 +718,15 @@ class BigDoor {
 
     public String CurrentMaterial() {
         // start in one corner, and loop through trying to find the biggest chunk of the same material. Data counts as different material.
-        List<Block> blocks = GetDoorBlocks();
-        blocks.add(Trigger);
 
-        return null;
+        String doorBlocks = "DOOR:\n";
+        for (Block block : GetDoorBlocks()) {
+            doorBlocks += "  " + this.SerialiseBlock(block) + "\n";
+        }
+        doorBlocks += "TRIGGER:\n";
+        doorBlocks += "  " + this.SerialiseBlock(Trigger);
+
+        return compress(doorBlocks);
     }
 
     private List<Block> GetDoorBlocks() {
@@ -767,10 +772,45 @@ class BigDoor {
         return location + "|" + m.toString() + (data > 0 ? "," + data.toString() : "");
     }
 
-    @SuppressWarnings("deprecation")
-    public Block DeserialiseBlock(World w, String s) {
+    class BlockInfo {
+        public Location location;
+        public MaterialData materialData;
+        BlockInfo (Location l, MaterialData md) {
+            location = l;
+            materialData = md;
+        }
+    }
 
-        return null;
+    @SuppressWarnings("deprecation")
+    public BlockInfo DeserialiseBlock(World w, String s) {
+        String args[] = s.split("\\|");
+        final Location l = InterpretLocation(w, args[0]);
+        final MaterialData md = InterpretMaterial(args[1]);
+
+        return new BlockInfo(l, md);
+    }
+
+    @SuppressWarnings("deprecation")
+    private MaterialData InterpretMaterial(String material) {
+        String[] args = material.split(",");
+        Material m = Material.valueOf(args[0]);
+        if (args.length > 1) {
+            byte b = (byte) (Integer.parseInt(args[1]));
+            return new MaterialData(m, b);
+        } else {
+            return new MaterialData(m);
+        }
+    }
+
+    private Location InterpretLocation(World world, String location) {
+        String[] args = location.split(",");
+
+        return new Location(
+            world,
+            Double.parseDouble(args[0]),
+            Double.parseDouble(args[1]),
+            Double.parseDouble(args[2])
+        );
     }
 
     public static String compress(String str) {
@@ -806,7 +846,8 @@ class BigDoor {
                 "Empty Block : AIR\n" +
                 "\n" +
                 "Allow List  : (everyone)\n" +
-                "Deny List   : (no-one)\n";
+                "Deny List   : (no-one)\n" +
+                CurrentMaterial();
     }
 
     public void Toggle() {
