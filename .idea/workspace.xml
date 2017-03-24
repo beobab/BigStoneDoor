@@ -16,6 +16,7 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$2.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/DoorTabCompleter.java" afterPath="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/DoorTabCompleter.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -67,8 +68,8 @@
       <file leaf-file-name="DoorTabCompleter.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/DoorTabCompleter.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="369">
-              <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+            <state relative-caret-position="180">
+              <caret line="18" column="24" lean-forward="true" selection-start-line="18" selection-start-column="24" selection-end-line="18" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -853,7 +854,14 @@
       <option name="project" value="LOCAL" />
       <updated>1490386307383</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Tidied up TabCompleter. &#10;Made a start on SQLite storage.">
+      <created>1490386317244</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1490386317244</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1419,8 +1427,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/DoorTabCompleter.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+        <state relative-caret-position="180">
+          <caret line="18" column="24" lean-forward="true" selection-start-line="18" selection-start-column="24" selection-end-line="18" selection-end-column="24" />
           <folding />
         </state>
       </provider>

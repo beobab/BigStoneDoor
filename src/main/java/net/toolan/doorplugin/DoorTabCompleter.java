@@ -10,10 +10,11 @@ import java.util.List;
 
 /**
  * Created by jonathan on 22/03/2017.
+ * DoorTabCompleter will fill in sub-commands and gates. Most commands take that form.
  */
 public class DoorTabCompleter implements TabCompleter {
 
-    public AllDoors DoorList;
+    AllDoors DoorList;
 
     DoorTabCompleter() {
 
@@ -36,7 +37,7 @@ public class DoorTabCompleter implements TabCompleter {
         return null;
     }
 
-    List<String> SomeOf(List<String> all, String partial) {
+    private List<String> SomeOf(List<String> all, String partial) {
         String lowerPartial = (partial == null ? "" : partial.toLowerCase());
         List<String> lst = new ArrayList<>();
         for (String item : all) {
