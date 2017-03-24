@@ -26,13 +26,11 @@ public class DoorTabCompleter implements TabCompleter {
         Bukkit.broadcastMessage(Integer.toString(args.length) + " arguments: ");
         for (String a : args) Bukkit.broadcastMessage(a);
 
-        if (args.length == 1) {
+        if (args.length == 1)
             return SomeOf(DoorSubCommand.SubCommandNameList(), args[0]);
-        }
 
-        if (args.length == 2) {
+        if (args.length == 2)
             return SomeOf(DoorList.ListDoorNames(), args[1]);
-        }
 
         return null;
     }

@@ -14,6 +14,7 @@ public class BigDoorStorageClass {
 
     String doorData; // Base64 encoded door.
 
+    @SuppressWarnings("deprecation")
     public BigDoor getDoor() {
 
         DoorInterpreter interpreter = new DoorInterpreter();

@@ -9,14 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import static net.toolan.doorplugin.StringCompressor.b64encode;
 
 public class BigDoor {
 
@@ -39,7 +33,7 @@ public class BigDoor {
         Size = d;
     }
 
-    public String CurrentMaterial() {
+    public String CurrentDoorMaterial() {
         // start in one corner, and loop through trying to find the biggest chunk of the same material. Data counts as different material.
 
         String doorBlocks = "DOOR:\n";
@@ -57,32 +51,8 @@ public class BigDoor {
     }
 
     private List<Block> GetDoorBlocks() {
-        double rootX = _root.getX();
-        double rootY = _root.getY();
-        double rootZ = _root.getZ();
-
-        int xMult = (Size.X < 0 ? -1 : +1);
-        int yMult = (Size.Y < 0 ? -1 : +1);
-        int zMult = (Size.Z < 0 ? -1 : +1);
-
-        int xMax = Math.abs(Size.X);
-        int yMax = Math.abs(Size.Y);
-        int zMax = Math.abs(Size.Z);
-
         List<Block> lst = new ArrayList<>();
-
-        Location workingBlock = _root.clone();
-        for (int x = 0; x < xMax; x++) {
-            workingBlock.setX(rootX + (x * xMult));
-            for (int y = 0; y < yMax; y++) {
-                workingBlock.setY(rootY + (y * yMult));
-                for (int z = 0; z < zMax; z++) {
-                    workingBlock.setZ(rootZ + (z * zMult));
-
-                    lst.add(_world.getBlockAt(workingBlock));
-                }
-            }
-        }
+        ApplyToAllBlocks(lst::add);
         return lst;
     }
 
@@ -96,7 +66,7 @@ public class BigDoor {
 
         Material m = b.getType();
         Byte data = b.getData();
-        return location + "|" + m.toString() + (data != null ? "," + data.toString() : "");
+        return location + "|" + m.toString() + (data > 0 ? "," + data.toString() : "");
     }
 
     class BlockInfo {
@@ -117,10 +87,6 @@ public class BigDoor {
 
         return new BlockInfo(l, md);
     }
-
-
-
-
 
 
     public String Info() {
@@ -149,9 +115,13 @@ public class BigDoor {
             Open();
     }
 
-    public void Open() {
-        // Should this be changing the world?
-        //Location workingBlock = _root.clone();
+    interface OperateOnBlock {
+        void operation(Block b);
+    }
+
+    private void ApplyToAllBlocks(OperateOnBlock command) {
+        if (command == null) return;
+
         double rootX = _root.getX();
         double rootY = _root.getY();
         double rootZ = _root.getZ();
@@ -173,43 +143,28 @@ public class BigDoor {
                     workingBlock.setZ(rootZ + (z * zMult));
 
                     Block b = _world.getBlockAt(workingBlock);
-                    b.setType(Material.AIR);
+                    command.operation(b);
 
                 }
             }
         }
+    }
+
+    public void Open() {
+        // Should this be changing the world?
+        //Location workingBlock = _root.clone();
+        ApplyToAllBlocks((b) -> b.setType(Material.AIR));
         isOpen = true;
+
+        //send "You feel a gust of air" to nearby players. Maybe a whoosh.
     }
 
     public void Close() {
         // This should definitely change the world!
-        double rootX = _root.getX();
-        double rootY = _root.getY();
-        double rootZ = _root.getZ();
-
-        int xMult = (Size.X < 0 ? -1 : +1);
-        int yMult = (Size.Y < 0 ? -1 : +1);
-        int zMult = (Size.Z < 0 ? -1 : +1);
-
-        int xMax = Math.abs(Size.X);
-        int yMax = Math.abs(Size.Y);
-        int zMax = Math.abs(Size.Z);
-
-        Location workingBlock = _root.clone();
-        for (int x = 0; x < xMax; x++) {
-            workingBlock.setX(rootX + (x * xMult));
-            for (int y = 0; y < yMax; y++) {
-                workingBlock.setY(rootY + (y * yMult));
-                for (int z = 0; z < zMax; z++) {
-                    workingBlock.setZ(rootZ + (z * zMult));
-
-                    Block b = _world.getBlockAt(workingBlock);
-                    b.setType(Material.STONE);
-
-                }
-            }
-        }
+        ApplyToAllBlocks((b) -> b.setType(Material.STONE));
         isOpen = false;
+
+        // Send "You feel a thud of the ground in your feet" to nearby players.
     }
 
 }

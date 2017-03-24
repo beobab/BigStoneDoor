@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+import net.toolan.doorplugin.AllDoors;
 import net.toolan.doorplugin.Database.Error;
 import net.toolan.doorplugin.Database.Errors;
 import org.bukkit.entity.Player;
@@ -146,5 +147,13 @@ public abstract class Database {
         } catch (SQLException ex) {
             Error.close(plugin, ex);
         }
+    }
+
+    public void saveDoors(AllDoors allDoors) {
+
+    }
+
+    public AllDoors loadDoors() {
+        return new AllDoors();
     }
 }

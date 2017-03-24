@@ -19,7 +19,7 @@ public class AllDoors {
     public List<BigDoor> Doors;
 
     //constructor
-    AllDoors() {
+    public AllDoors() {
         Doors = new ArrayList<BigDoor>();
 //        Doors.add(new BigDoor("mountainway", "LiztherWiz"));
 //        Doors.add(new BigDoor("dragondoors", "Minecraft_101"));

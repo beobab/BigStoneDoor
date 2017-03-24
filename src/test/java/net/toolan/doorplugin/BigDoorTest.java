@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 /**
  * Created by jonathan on 24/03/2017.
+ * Door mechanics.
  */
 public class BigDoorTest {
 

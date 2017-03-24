@@ -5,7 +5,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Created by jonathan on 24/03/2017.
+ * Created by jonathan on 24/03/2017
+ * DoorSize tests.
  */
 public class DoorSizeTest {
 
