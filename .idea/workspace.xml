@@ -6,16 +6,14 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="20fedb09-63d2-4931-84a5-c1b93c444037" name="Default" comment="Added code to serialise a block and SQLite to save a table.">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$SubCommand.class" afterPath="" />
+    <list default="true" id="20fedb09-63d2-4931-84a5-c1b93c444037" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/BigDoor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/AllDoors$LocationPair.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/AllDoors$LocationPair.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/AllDoors.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/AllDoors.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/BigDoor.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/BigDoor.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/BigDoorStorageClass.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/BigDoorStorageClass.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/CommandArguments.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/CommandArguments.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/Database/SQLite.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/Database/SQLite.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/DoorSize.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/DoorSize.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/DoorTabCompleter.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/DoorTabCompleter.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$1.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$2.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin$2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin.class" afterPath="$PROJECT_DIR$/target/classes/net/toolan/doorplugin/doorplugin.class" />
@@ -37,30 +35,29 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="MANIFEST.MF" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="1" column="44" lean-forward="false" selection-start-line="1" selection-start-column="44" selection-end-line="1" selection-end-column="44" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="doorplugin.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="doorplugin.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/doorplugin.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="850" column="5" lean-forward="false" selection-start-line="850" selection-start-column="5" selection-end-line="850" selection-end-column="5" />
+            <state relative-caret-position="474">
+              <caret line="700" column="0" lean-forward="false" selection-start-line="700" selection-start-column="0" selection-end-line="700" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
                 <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
                 <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-                <element signature="e#13956#13988#0" expanded="true" />
-                <element signature="e#26157#26189#0" expanded="true" />
-                <element signature="e#26848#26880#0" expanded="true" />
-                <element signature="e#27147#27179#0" expanded="true" />
+                <element signature="e#14064#14096#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BigDoor.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/BigDoor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="27" column="25" lean-forward="true" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="25" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -208,6 +205,7 @@
         <option value="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/DoorSubCommand.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/Database/SQLite.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/doorplugin.java" />
+        <option value="$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/BigDoor.java" />
       </list>
     </option>
   </component>
@@ -684,7 +682,14 @@
       <option name="project" value="LOCAL" />
       <updated>1490303210177</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Output CurrentMaterials in info command">
+      <created>1490304729316</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1490304729316</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -694,11 +699,11 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32897604" sideWeight="0.46666667" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32897604" sideWeight="0.4642857" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32897604" sideWeight="0.53333336" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32897604" sideWeight="0.53571427" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -726,7 +731,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added code to serialise a block and SQLite to save a table." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added code to serialise a block and SQLite to save a table." />
+    <MESSAGE value="Output CurrentMaterials in info command" />
+    <option name="LAST_COMMIT_MESSAGE" value="Output CurrentMaterials in info command" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -764,10 +770,7 @@
             <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-            <element signature="e#13956#13988#0" expanded="true" />
-            <element signature="e#26157#26189#0" expanded="true" />
-            <element signature="e#26848#26880#0" expanded="true" />
-            <element signature="e#27147#27179#0" expanded="true" />
+            <element signature="e#14064#14096#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -868,10 +871,7 @@
             <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-            <element signature="e#13956#13988#0" expanded="true" />
-            <element signature="e#26157#26189#0" expanded="true" />
-            <element signature="e#26848#26880#0" expanded="true" />
-            <element signature="e#27147#27179#0" expanded="true" />
+            <element signature="e#14064#14096#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -954,10 +954,7 @@
             <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-            <element signature="e#13956#13988#0" expanded="true" />
-            <element signature="e#26157#26189#0" expanded="true" />
-            <element signature="e#26848#26880#0" expanded="true" />
-            <element signature="e#27147#27179#0" expanded="true" />
+            <element signature="e#14064#14096#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1003,10 +1000,7 @@
             <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-            <element signature="e#13956#13988#0" expanded="true" />
-            <element signature="e#26157#26189#0" expanded="true" />
-            <element signature="e#26848#26880#0" expanded="true" />
-            <element signature="e#27147#27179#0" expanded="true" />
+            <element signature="e#14064#14096#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1124,17 +1118,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/doorplugin.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="850" column="5" lean-forward="false" selection-start-line="850" selection-start-column="5" selection-end-line="850" selection-end-column="5" />
+        <state relative-caret-position="474">
+          <caret line="700" column="0" lean-forward="false" selection-start-line="700" selection-start-column="0" selection-end-line="700" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#MatchesCommand#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentIntAt#0;class#doorplugin#0" expanded="false" />
             <element signature="method#ArgumentAt#0;class#doorplugin#0" expanded="false" />
-            <element signature="e#13956#13988#0" expanded="true" />
-            <element signature="e#26157#26189#0" expanded="true" />
-            <element signature="e#26848#26880#0" expanded="true" />
-            <element signature="e#27147#27179#0" expanded="true" />
+            <element signature="e#14064#14096#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/toolan/doorplugin/BigDoor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="27" column="25" lean-forward="true" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
