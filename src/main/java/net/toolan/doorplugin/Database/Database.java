@@ -19,7 +19,7 @@ public abstract class Database {
     Main plugin;
     Connection connection;
     // The name of the table we created back in SQLite class.
-    public String table = "table_name";
+    public String table = "doors";
     public int tokens = 0;
     public Database(Main instance){
         plugin = instance;

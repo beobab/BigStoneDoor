@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static net.toolan.doorplugin.StringCompressor.b64encode;
+
 public class BigDoor {
 
     World _world;
@@ -48,7 +50,7 @@ public class BigDoor {
             doorBlocks += "TRIGGER:\n";
             doorBlocks += "  " + this.SerialiseBlock(Trigger);
         }
-        String result = b64encode(compress(doorBlocks));
+        String result = StringCompressor.crunch(doorBlocks);
 
         Bukkit.broadcastMessage("DoorMaterial: " + result);
         return result;
@@ -109,97 +111,16 @@ public class BigDoor {
     @SuppressWarnings("deprecation")
     public BlockInfo DeserialiseBlock(World w, String s) {
         String args[] = s.split("\\|");
-        final Location l = InterpretLocation(w, args[0]);
-        final MaterialData md = InterpretMaterial(args[1]);
+
+        final Location l = DoorInterpreter.InterpretLocation(w, args[0]);
+        final MaterialData md = DoorInterpreter.InterpretMaterial(args[1]);
 
         return new BlockInfo(l, md);
     }
 
-    @SuppressWarnings("deprecation")
-    private MaterialData InterpretMaterial(String material) {
-        String[] args = material.split(",");
-        Material m = Material.valueOf(args[0]);
-        if (args.length > 1) {
-            byte b = (byte) (Integer.parseInt(args[1]));
-            return new MaterialData(m, b);
-        } else {
-            return new MaterialData(m);
-        }
-    }
 
-    private Location InterpretLocation(World world, String location) {
-        String[] args = location.split(",");
 
-        return new Location(
-            world,
-            Double.parseDouble(args[0]),
-            Double.parseDouble(args[1]),
-            Double.parseDouble(args[2])
-        );
-    }
 
-    private static String CharsetUTF8 = "UTF-8";
-
-    public static String compress(String str) {
-        if (str == null || str.length() == 0) {
-            return str;
-        }
-
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzip = new GZIPOutputStream(out);
-            gzip.write(str.getBytes(CharsetUTF8));
-            gzip.close();
-            return out.toString(CharsetUTF8);
-        } catch (Exception ex){
-            return str; // can't compress it. :(
-        }
-    }
-
-    public static String decompress(String str) {
-        if (str == null || str.length() == 0) {
-            return str;
-        }
-
-        try {
-            InputStream input = new ByteArrayInputStream(str.getBytes(CharsetUTF8));
-            InputStream gzip = new GZIPInputStream(input);
-            Reader decoder = new InputStreamReader(gzip, CharsetUTF8);
-            BufferedReader buffered = new BufferedReader(decoder);
-
-            final int bufferSize = 1024;
-            final char[] buffer = new char[bufferSize];
-            final StringBuilder out = new StringBuilder();
-
-            for (; ; ) {
-                int rsz = buffered.read(buffer, 0, buffer.length);
-                if (rsz < 0)
-                    break;
-                out.append(buffer, 0, rsz);
-            }
-            return out.toString();
-
-        } catch (Exception ex){
-            return ex.getMessage(); // can't decompress it. :(
-        }
-    }
-
-    private static String b64encode(String s) {
-        try {
-            byte[] encodedBytes = Base64.getEncoder().encode(s.getBytes(CharsetUTF8));
-            return new String(encodedBytes, CharsetUTF8);
-        } catch (Exception ex) {
-            return "unable to encode";
-        }
-    }
-    private static String b64decode(String s) {
-        try {
-            byte[] decodedBytes = Base64.getDecoder().decode(s.getBytes(CharsetUTF8));
-            return new String(decodedBytes, CharsetUTF8);
-        } catch (Exception ex) {
-            return ex.getMessage() + " => unable to decode";
-        }
-    }
 
 
     public String Info() {
@@ -218,12 +139,7 @@ public class BigDoor {
                 "Empty Block : AIR\n" +
                 "\n" +
                 "Allow List  : (everyone)\n" +
-                "Deny List   : (no-one)\n" +
-                compress("Hello")+ "\n" +
-                decompress(compress("Hello")) + "\n" +
-                b64decode(b64encode("There")) + "\n" +
-                CurrentMaterial()+ "\n" +
-                decompress(b64decode("H++/vQgAAAAAAAAAc++/ve+/vQ/vv73vv71SUO+/vTU0MO+/vTE177+90bU077+9CQ7vv73vv71z77+9MUARNe+/vRA1x6rvv70c77+9Wgvvv71qLVDvv70CAGTvv73Ine+/vQAAAA=="));
+                "Deny List   : (no-one)";
     }
 
     public void Toggle() {
