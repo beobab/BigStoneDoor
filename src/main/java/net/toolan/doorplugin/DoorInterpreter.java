@@ -56,6 +56,12 @@ public class DoorInterpreter {
         );
     }
 
+    public static String LocationAsString(Location loc) {
+        return Integer.toString(loc.getBlockX()) + "," +
+                Integer.toString(loc.getBlockY()) + "," +
+                Integer.toString(loc.getBlockZ());
+    }
+
     public static DoorSize InterpretSize(String doorSize) {
         String[] args = doorSize.split(",");
         return new DoorSize(Integer.parseInt(args[0]),
@@ -63,5 +69,10 @@ public class DoorInterpreter {
                             Integer.parseInt(args[2]));
     }
 
+    public static String DoorSizeAsString(DoorSize doorSize) {
+        return Integer.toString(doorSize.X) + "," +
+                Integer.toString(doorSize.Y) + "," +
+                Integer.toString(doorSize.Z);
+    }
 }
 

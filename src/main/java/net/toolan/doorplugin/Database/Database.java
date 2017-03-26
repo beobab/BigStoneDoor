@@ -8,20 +8,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import net.toolan.doorplugin.AllDoors;
-import net.toolan.doorplugin.Database.Error;
-import net.toolan.doorplugin.Database.Errors;
-import org.bukkit.entity.Player;
+import net.toolan.doorplugin.BigDoor;
+import net.toolan.doorplugin.BigDoorStorageClass;
+import net.toolan.doorplugin.DoorBell;
 
 
 public abstract class Database {
     Main plugin;
     Connection connection;
-    // The name of the table we created back in SQLite class.
-    public String table = "doors";
-    public int tokens = 0;
+
     public Database(Main instance){
         plugin = instance;
     }
@@ -33,101 +34,108 @@ public abstract class Database {
     public void initialize(){
         connection = getSQLConnection();
         try{
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + table + " WHERE player = ?");
+            PreparedStatement ps = connection.prepareStatement("select sqlite_version();");
             ResultSet rs = ps.executeQuery();
             close(ps,rs);
 
         } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection", ex);
+            plugin.getLogger().log(Level.SEVERE, "Unable to retrieve connection", ex);
         }
     }
 
-    // These are the methods you can use to get things out of your database. You of course can make new ones to return different things in the database.
-    // This returns the number of people the player killed.
-    public Integer getTokens(String string) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';");
+    private List<BigDoorStorageClass> getAllDoors() {
+        List<BigDoorStorageClass> lst = new ArrayList<BigDoorStorageClass>();
+        NonQuery((Connection conn) -> {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT * FROM door;"
+            )) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        BigDoorStorageClass door = new BigDoorStorageClass();
+                        door.doorName = rs.getString("name");
+                        door.owner = rs.getString("player");
+                        door.worldName = rs.getString("world");
+                        door.doorRoot = rs.getString("root");
+                        door.doorSize = rs.getString("size");
+                        door.state = rs.getString("state");
+                        door.openBlockMaterial = rs.getString("openBlockMaterial");
 
-            rs = ps.executeQuery();
-            while(rs.next()){
-                if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){ // Tell database to search for the player you sent into the method. e.g getTokens(sam) It will look for sam.
-                    return rs.getInt("kills"); // Return the players ammount of kills. If you wanted to get total (just a random number for an example for you guys) You would change this to total!
+                        try(PreparedStatement psT = conn.prepareStatement(
+                                "SELECT blockKey FROM doorTrigger WHERE name = ?;"
+                        )) {
+                            List<String> triggers = new ArrayList<>();
+                            psT.setString(1, door.doorName);
+                            try(ResultSet rsT = psT.executeQuery()) {
+                                while (rsT.next()) {
+                                    triggers.add(rsT.getString("blockKey"));
+                                }
+                            }
+                            door.Triggers = triggers;
+                        }
+
+                        lst.add(door);
+                    }
                 }
             }
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
-            }
-        }
-        return 0;
+        });
+        return lst;
     }
-    // Exact same method here, Except as mentioned above i am looking for total!
-    public Integer getTotal(String string) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';");
 
-            rs = ps.executeQuery();
-            while(rs.next()){
-                if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){
-                    return rs.getInt("total");
+    public void saveDoor(String name, String owner, String world, String root, String size, String state, String openBlockMaterial, List<String> triggers) {
+        NonQuery((Connection conn) -> {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "REPLACE INTO door" +
+                            " (name, player, world, root, size, state, openBlockMaterial)" +
+                            " VALUES(?,?,?,?,?,?,?);"))
+            {
+                ps.setString(1, name); // YOU MUST put these into this line!! And depending on how many
+                ps.setString(2, owner);
+                ps.setString(3, world);
+                ps.setString(4, root);
+                ps.setString(5, size);
+                ps.setString(6, state);
+                ps.setString(7, openBlockMaterial);
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM doorTrigger WHERE name = ?;")) {
+                ps.setString(1, name);
+                ps.executeUpdate();
+            }
+
+            for (String key : triggers) {
+                try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO doorTrigger" +
+                            " (name, blockKey)" +
+                            " VALUES(?,?);"))
+                {
+                    ps.setString(1, name);
+                    ps.setString(2, key);
+                    ps.executeUpdate();
                 }
             }
-        } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException ex) {
-                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
-            }
-        }
-        return 0;
+        });
     }
 
-    // Now we need methods to save things to the database
-    public void setTokens(Player player, Integer tokens, Integer total) {
+    interface ISqlCommand {
+        void execute(Connection conn) throws Exception;
+    }
+
+    public void NonQuery(ISqlCommand sql) {
+        if (sql == null) return;
         Connection conn = null;
-        PreparedStatement ps = null;
         try {
             conn = getSQLConnection();
-            ps = conn.prepareStatement("REPLACE INTO " + table + " (player,kills,total) VALUES(?,?,?)"); // IMPORTANT. In SQLite class, We made 3 colums. player, Kills, Total.
-            ps.setString(1, player.getName().toLowerCase());                                             // YOU MUST put these into this line!! And depending on how many
-            // colums you put (say you made 5) All 5 need to be in the brackets
-            // Seperated with comma's (,) AND there needs to be the same amount of
-            // question marks in the VALUES brackets. Right now i only have 3 colums
-            // So VALUES (?,?,?) If you had 5 colums VALUES(?,?,?,?,?)
+            sql.execute(conn);
 
-            ps.setInt(2, tokens); // This sets the value in the database. The colums go in order. Player is ID 1, kills is ID 2, Total would be 3 and so on. you can use
-            // setInt, setString and so on. tokens and total are just variables sent in, You can manually send values in as well. p.setInt(2, 10) <-
-            // This would set the players kills instantly to 10. Sorry about the variable names, It sets their kills to 10 i just have the variable called
-            // Tokens from another plugin :/
-            ps.setInt(3, total);
-            ps.executeUpdate();
             return;
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.SEVERE, "Some other exception, maybe parameter related.", ex);
         } finally {
             try {
-                if (ps != null)
-                    ps.close();
                 if (conn != null)
                     conn.close();
             } catch (SQLException ex) {
@@ -136,7 +144,6 @@ public abstract class Database {
         }
         return;
     }
-
 
     public void close(PreparedStatement ps,ResultSet rs){
         try {
@@ -150,10 +157,26 @@ public abstract class Database {
     }
 
     public void saveDoors(AllDoors allDoors) {
-
+        for (BigDoor door : allDoors.Doors) {
+            if (door.isModified) {
+                BigDoorStorageClass dc = BigDoorStorageClass.FromDoor(door);
+                saveDoor(dc.doorName, dc.owner,
+                        dc.worldName, dc.doorRoot, dc.doorSize,
+                        dc.state, dc.openBlockMaterial,
+                        dc.Triggers);
+            }
+        }
     }
 
-    public AllDoors loadDoors() {
-        return new AllDoors();
+    public AllDoors loadDoors(DoorBell doorbell) {
+        AllDoors allDoors = new AllDoors();
+
+        for (BigDoorStorageClass dc : getAllDoors()) {
+            BigDoor door = dc.getDoor(doorbell);
+            door.isModified = false;
+            allDoors.Doors.add(door);
+        }
+
+        return allDoors;
     }
 }

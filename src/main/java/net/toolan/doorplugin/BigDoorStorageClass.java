@@ -2,41 +2,65 @@ package net.toolan.doorplugin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
+import java.util.List;
+import java.util.UUID;
 
 public class BigDoorStorageClass {
-    String doorName;
-    String worldName;
-    String ownerName;
-    String doorSize;
-    String doorRoot;
+    public String doorName;
+    public String worldName;
+    public String owner;
+    public String doorSize;
+    public String doorRoot;
 
-    String doorData; // Base64 encoded door.
+    public String state;
+    public String openBlockMaterial;
 
-    @SuppressWarnings("deprecation")
-    public BigDoor getDoor() {
+    public List<String> Triggers;
 
-        DoorInterpreter interpreter = new DoorInterpreter();
+    public BigDoor getDoor(DoorBell doorbell) {
 
-        Player owner = Bukkit.getPlayer(ownerName);
-        World world = Bukkit.getWorld(worldName);
-        Location root = interpreter.InterpretLocation(world, doorRoot);
-        DoorSize size = interpreter.InterpretSize(doorSize);
+        UUID ownerId = UUID.fromString(owner);
 
-        return new BigDoor(
+        Location root = DoorInterpreter.InterpretLocation((World) null, doorRoot);
+        DoorSize size = DoorInterpreter.InterpretSize(doorSize);
+
+        BigDoor d = new BigDoor(
                 doorName,
-                owner,
-                world,
+                ownerId,
+                worldName,
                 root,
                 size
         );
+        d.TriggerKeys = Triggers;
+
+        for (String key : Triggers) {
+            doorbell.setDoorBell(key, d);
+        }
+
+        return d;
+   }
+
+   public static BigDoorStorageClass FromDoor(BigDoor door) {
+       BigDoorStorageClass ds = new BigDoorStorageClass();
+       ds.doorName = door.Name;
+       ds.worldName = door.getWorldName();
+       ds.owner = door.getOwner().getUniqueId().toString();
+       ds.doorSize = DoorInterpreter.DoorSizeAsString(door.getSize());
+       ds.doorRoot = DoorInterpreter.LocationAsString(door.getRoot());
+
+       ds.state = door.isOpen ? "OPEN" : "CLOSED";
+       ds.openBlockMaterial = Material.AIR.toString();
+
+       ds.Triggers = door.TriggerKeys;
+
+       return ds;
    }
 
     @Override
     public String toString() {
         return "Name: " + (doorName == null ? "(null)" : doorName) + "\n" +
-                "Owner: " + (ownerName == null ? "(null)" : ownerName) + "\n" +
                 "World: " + (worldName == null ? "(null)" : worldName) + "\n" +
                 "Location: " + (doorRoot == null ? "(null)" : doorRoot.toString()) + "\n" +
                 "Size: " + (doorSize == null ? "(null)" : doorSize.toString());

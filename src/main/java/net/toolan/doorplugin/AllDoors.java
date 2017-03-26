@@ -125,7 +125,7 @@ public class AllDoors {
                 "--------------------------------------------\n";
         for(Iterator<BigDoor> i = Doors.iterator(); i.hasNext(); ) {
             BigDoor item = i.next();
-            s += item.Name + " (" + item.Owner + ")\n";
+            s += item.Name + " (" + item.getOwnerName() + ")\n";
         }
         return s;
     }
@@ -271,11 +271,11 @@ public class AllDoors {
 
 
             Location loc = GetLocationInFrontOfPlayer(player);
-            World w = loc.getWorld();
+            String worldName = loc.getWorld().getName();
 
             DoorSize doorSize = ConvertDoorSizeFromRightUpIn(player, parsedArguments.doorSize);
 
-            BigDoor newDoor = new BigDoor(parsedArguments.doorName, player, w, loc, doorSize);
+            BigDoor newDoor = new BigDoor(parsedArguments.doorName, player.getUniqueId(), worldName, loc, doorSize);
             newDoor.Close();
 
             return Doors.add(newDoor);

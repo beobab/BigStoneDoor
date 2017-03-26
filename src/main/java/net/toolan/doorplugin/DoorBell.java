@@ -50,11 +50,6 @@ public class DoorBell implements Listener {
                 wn + "|" + m;
     }
 
-    //maybe move this to BigDoor?
-    private static String DoorKey (BigDoor d) {
-        return (d == null ? "" : ((d.Name == null ? "" : d.Name) + "|" + (d.Owner == null ? "" : d.Owner.getName())));
-    }
-
     // The doorbell.
     @EventHandler
     public void onButtonClick(PlayerInteractEvent e) {
@@ -112,7 +107,7 @@ public class DoorBell implements Listener {
 
         OperateDoor setTriggerOnDoor = (PlayerInteractEvent e) -> {
             Block b = e.getClickedBlock();
-            door.Trigger = b;
+            door.AddTrigger(BlockKey(b));
 
             setDoorBell(BlockKey(b), door);
             e.getPlayer().sendMessage("This will now open and close door: " + door.Name);

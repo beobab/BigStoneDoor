@@ -1,38 +1,57 @@
 package net.toolan.doorplugin;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BigDoor {
 
-    World _world;
-    Location _root;
-    CommandSender _messages;
-
     public String Name;
-    public Player Owner;
-    public DoorSize Size;
-    public Block Trigger;
-
+    public List<String> TriggerKeys;
     public boolean isOpen = false;
+    public boolean isModified = false;
 
-    BigDoor(String name, Player owner, World w, Location root, DoorSize d) {
-        Name = name;
-        Owner = owner;
-        _world = w;
-        _root = root;
-        Size = d;
+    public String getOwnerName() { return _playerUID == null ? "<no-one>" : getOwner().getName(); }
+    public OfflinePlayer getOwner() {return (_playerUID == null ? null : Bukkit.getOfflinePlayer(_playerUID)); }
+
+//    //maybe move this to BigDoor?
+//    public static String DoorKey (BigDoor d) {
+//        return (d == null ? "" : ((d.Name == null ? "" : d.Name) + "|" + (d._playerUID == null ?  "" : d.getOwnerName())));
+//    }
+
+    private UUID _playerUID;
+
+    private String _worldName;
+    public String getWorldName() { return _worldName; }
+
+    private World _world;
+    public World getWorld() {
+        if (_world == null)
+            _world = Bukkit.getWorld(_worldName);
+        return _world;
     }
 
+    private Location _root;
+    public Location getRoot() { return _root; }
+    private DoorSize _size;
+    public DoorSize getSize() { return _size; }
+
+    BigDoor(String name, UUID ownerId, String worldName, Location root, DoorSize d) {
+        Name = name;
+        _playerUID = ownerId;
+        _worldName = worldName;
+        _root = root;
+        _size = d;
+
+        TriggerKeys = new ArrayList<>();
+    }
+
+    /*
     public String CurrentDoorMaterial() {
         // start in one corner, and loop through trying to find the biggest chunk of the same material. Data counts as different material.
 
@@ -40,9 +59,9 @@ public class BigDoor {
         for (Block block : GetDoorBlocks()) {
             doorBlocks += "  " + this.SerialiseBlock(block) + "\n";
         }
-        if (Trigger != null) {
-            doorBlocks += "TRIGGER:\n";
-            doorBlocks += "  " + this.SerialiseBlock(Trigger);
+        if (TriggerKeys != null) {
+            //doorBlocks += "TRIGGER:\n";
+            //doorBlocks += "  " + this.SerialiseBlock(TriggerKeys);
         }
         String result = StringCompressor.crunch(doorBlocks);
 
@@ -69,15 +88,6 @@ public class BigDoor {
         return location + "|" + m.toString() + (data > 0 ? "," + data.toString() : "");
     }
 
-    class BlockInfo {
-        public Location location;
-        public MaterialData materialData;
-        BlockInfo (Location l, MaterialData md) {
-            location = l;
-            materialData = md;
-        }
-    }
-
     @SuppressWarnings("deprecation")
     public BlockInfo DeserialiseBlock(World w, String s) {
         String args[] = s.split("\\|");
@@ -89,16 +99,60 @@ public class BigDoor {
     }
 
 
+    class BlockInfo {
+        public Location location;
+        public MaterialData materialData;
+        BlockInfo (Location l, MaterialData md) {
+            location = l;
+            materialData = md;
+        }
+    }
+*/
+    public void AddTrigger(String s) {
+        TriggerKeys.add(s);
+        isModified = true;
+    }
+
+
+
+    private String InfoLocation() {
+        if (_root == null) return "WARNING! root is null!";
+        if (_size == null) return "WARNING! size is null!";
+        return "Location    : " +
+                Integer.toString(_root.getBlockX()) + "," +
+                Integer.toString(_root.getBlockY()) + "," +
+                Integer.toString(_root.getBlockZ()) + " to " +
+                Integer.toString(_root.getBlockX() + _size.X) + "," +
+                Integer.toString(_root.getBlockY() + _size.Y) + "," +
+                Integer.toString(_root.getBlockZ() + _size.Z) +
+                (getWorld() == null ? "" : " in " + getWorld().getName()) + "\n";
+    }
+
+    private String InfoTriggers() {
+        if (TriggerKeys == null) return "Trigger     : NONE";
+
+        String str = "";
+        for (String key : TriggerKeys) {
+            if (str.equals("")) {
+                str = key + "\n";
+            } else {
+                str = "            : " + key + "\n";
+            }
+        }
+        if (str.equals("")) return "";
+        return "Trigger     : " + str;
+    }
+
     public String Info() {
         return "Name        : " + Name + "\n" +
-                "Owner       : " + (Owner == null ? "<no-one>" : Owner.getDisplayName()) + "\n" +
+                "Owner       : " + getOwnerName() + "\n" +
                 "------------ -------------------------------\n" +
-                "Description : A sliding door which opens from the middle outwards.\n" +
-                "            : A vanishing door.\n" +
-                "            : An opening door which opens from the top downwards.\n" +
-                "Orientation : The top of the door is (up|north|etc), and it will open (up|north|etc)wards.\n" +
-                "Location    : x,y,z to x,y,z \n" +
-                "Trigger     : Button at x,y,z\n" +
+                "Description : A vanishing door.\n" +
+                //"            : A sliding door which opens from the middle outwards.\n" +
+                //"            : An opening door which opens from the top downwards.\n" +
+                //"Orientation : The top of the door is (up|north|etc), and it will open (up|north|etc)wards.\n" +
+                InfoLocation() +
+                InfoTriggers() +
                 "Style       : SLIDING\n" +
                 "Direction   : OUT\n" +
                 "   (middle) : x = 435 z = 64\n" +
@@ -126,13 +180,13 @@ public class BigDoor {
         double rootY = _root.getY();
         double rootZ = _root.getZ();
 
-        int xMult = (Size.X < 0 ? -1 : +1);
-        int yMult = (Size.Y < 0 ? -1 : +1);
-        int zMult = (Size.Z < 0 ? -1 : +1);
+        int xMult = (_size.X < 0 ? -1 : +1);
+        int yMult = (_size.Y < 0 ? -1 : +1);
+        int zMult = (_size.Z < 0 ? -1 : +1);
 
-        int xMax = Math.abs(Size.X);
-        int yMax = Math.abs(Size.Y);
-        int zMax = Math.abs(Size.Z);
+        int xMax = Math.abs(_size.X);
+        int yMax = Math.abs(_size.Y);
+        int zMax = Math.abs(_size.Z);
 
         Location workingBlock = _root.clone();
         for (int x = 0; x < xMax; x++) {
@@ -142,7 +196,7 @@ public class BigDoor {
                 for (int z = 0; z < zMax; z++) {
                     workingBlock.setZ(rootZ + (z * zMult));
 
-                    Block b = _world.getBlockAt(workingBlock);
+                    Block b = getWorld().getBlockAt(workingBlock);
                     command.operation(b);
 
                 }
@@ -151,11 +205,10 @@ public class BigDoor {
     }
 
     public void Open() {
-        // Should this be changing the world?
-        //Location workingBlock = _root.clone();
+        // Need to check if these blocks are loaded.
         ApplyToAllBlocks((b) -> b.setType(Material.AIR));
         isOpen = true;
-
+        isModified = true;
         //send "You feel a gust of air" to nearby players. Maybe a whoosh.
     }
 
@@ -163,7 +216,7 @@ public class BigDoor {
         // This should definitely change the world!
         ApplyToAllBlocks((b) -> b.setType(Material.STONE));
         isOpen = false;
-
+        isModified = true;
         // Send "You feel a thud of the ground in your feet" to nearby players.
     }
 

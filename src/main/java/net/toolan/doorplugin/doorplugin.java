@@ -9,14 +9,15 @@ import net.toolan.doorplugin.Database.Main;
 import net.toolan.doorplugin.Database.SQLite;
 import org.bukkit.Bukkit;
 
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class doorplugin extends JavaPlugin {
+import java.util.List;
 
-    public static final boolean DEBUG = true;
+public final class doorplugin extends JavaPlugin {
 
     private DoorBell _doorbell;
     public DoorBell getDoorBell() {
@@ -27,18 +28,28 @@ public final class doorplugin extends JavaPlugin {
     public Database db;
     public Database getSqlDatabase() { return this.db; }
 
-    AllDoors _allDoors;
+    private AllDoors _allDoors;
 
 
     @Override
     public void onEnable() {
+
+        List<World> worlds = Bukkit.getServer().getWorlds();
+        for (World w : worlds) {
+            getLogger().info("recognised world: " + w.getName());
+        }
+
+        // This should create the config directories.
+        saveDefaultConfig();
+
         // called when the plugin is reloaded. Assume wiped from memory until this point.
         getLogger().info("onEnable has been invoked!");
 
         this.db = new SQLite(new Main(this));
         this.db.load();
 
-        _allDoors = getSqlDatabase().loadDoors();
+        _allDoors = getSqlDatabase().loadDoors(getDoorBell());
+
         getLogger().info("Loaded " + Integer.toString(_allDoors.Count()) + " door(s).");
         Bukkit.getPluginManager().registerEvents(getDoorBell(), this);
 
@@ -66,28 +77,12 @@ public final class doorplugin extends JavaPlugin {
             if (sender instanceof Player)
                 player = (Player) sender;
 
-            if (DEBUG) sender.sendMessage(Integer.toString(args.length) + " arguments");
-
             DoorSubCommand subCmd = DoorSubCommand.GetSubCommand(args);
-
-            if (DEBUG) {
-                if (subCmd == null) {
-                    sender.sendMessage("No subCommand!");
-                    sender.sendMessage("Usage: /door help");
-                } else {
-                    sender.sendMessage(subCmd.toString());
-                }
-            }
-
 
             CommandArguments parsedArgs = DoorSubCommand.ParseArguments(args, subCmd);
             if (parsedArgs == null) {
                 sender.sendMessage("No arguments!");
                 return false;
-            }
-
-            if (DEBUG) {
-                sender.sendMessage(parsedArgs.toString());
             }
 
             if (subCmd == DoorSubCommand.Demo) {
@@ -98,7 +93,6 @@ public final class doorplugin extends JavaPlugin {
             if (subCmd == DoorSubCommand.List) {
                 sender.sendMessage(_allDoors.ListDoors());
             }
-
 
             else if (subCmd == DoorSubCommand.Info) {
                 BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
