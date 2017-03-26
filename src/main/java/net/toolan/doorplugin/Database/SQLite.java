@@ -40,6 +40,14 @@ public class SQLite extends Database {
             "PRIMARY KEY (`triggerId`)" +  // This is creating 3 columns Player, Kills, Total. Primary key is what you are going to use as your indexer. Here we want to use player so
             ");"; // we can search by player, and get kills and total. If you some how were searching kills it would provide total and player.
 
+    public String SQLiteCreateBlockTable = "CREATE TABLE IF NOT EXISTS doorBlock (" + // make sure to put your table name in here too.
+            "`blockId` integer NOT NULL," +
+            "`name` varchar(32) NOT NULL," + // This creates the different columns you will save data too. varchar(32) Is a string, int = integer
+            "`locationKey` varchar(32) NOT NULL," +
+            "`blockKey` varchar(32) NOT NULL," +
+            "PRIMARY KEY (`blockId`)" +  // This is creating 3 columns Player, Kills, Total. Primary key is what you are going to use as your indexer. Here we want to use player so
+            ");"; // we can search by player, and get kills and total. If you some how were searching kills it would provide total and player.
+
 
     // SQL creation stuff, You can leave the blow stuff untouched.
     public Connection getSQLConnection() {
@@ -87,6 +95,16 @@ public class SQLite extends Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        Bukkit.broadcastMessage("Load block table");
+        try {
+            Statement s = connection.createStatement();
+            s.executeUpdate(SQLiteCreateBlockTable);
+            s.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         initialize();
     }
 }

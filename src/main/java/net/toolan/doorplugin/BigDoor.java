@@ -5,9 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.material.MaterialData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class BigDoor {
 
@@ -49,6 +47,8 @@ public class BigDoor {
         _size = d;
 
         TriggerKeys = new ArrayList<>();
+
+        isModified = true;
     }
 
     /*
@@ -112,7 +112,10 @@ public class BigDoor {
         TriggerKeys.add(s);
         isModified = true;
     }
-
+    public void RemoveTrigger(String s) {
+        TriggerKeys.remove(s);
+        isModified = true;
+    }
 
 
     private String InfoLocation() {
@@ -152,14 +155,14 @@ public class BigDoor {
                 //"            : An opening door which opens from the top downwards.\n" +
                 //"Orientation : The top of the door is (up|north|etc), and it will open (up|north|etc)wards.\n" +
                 InfoLocation() +
-                InfoTriggers() +
-                "Style       : SLIDING\n" +
-                "Direction   : OUT\n" +
-                "   (middle) : x = 435 z = 64\n" +
-                "Empty Block : AIR\n" +
-                "\n" +
-                "Allow List  : (everyone)\n" +
-                "Deny List   : (no-one)";
+                InfoTriggers();
+//                "Style       : SLIDING\n" +
+//                "Direction   : OUT\n" +
+//                "   (middle) : x = 435 z = 64\n" +
+//                "Empty Block : AIR\n" +
+//                "\n" +
+//                "Allow List  : (everyone)\n" +
+//                "Deny List   : (no-one)";
     }
 
     public void Toggle() {
@@ -173,9 +176,12 @@ public class BigDoor {
         void operation(Block b);
     }
 
-    private void ApplyToAllBlocks(OperateOnBlock command) {
-        if (command == null) return;
+    interface OperateOnLocation {
+        void operation(Location location);
+    }
 
+    private void ApplyToAllBlocks(OperateOnLocation command) {
+        if (command == null) return;
         double rootX = _root.getX();
         double rootY = _root.getY();
         double rootZ = _root.getZ();
@@ -189,6 +195,8 @@ public class BigDoor {
         int zMax = Math.abs(_size.Z);
 
         Location workingBlock = _root.clone();
+        workingBlock.setWorld(getWorld());
+
         for (int x = 0; x < xMax; x++) {
             workingBlock.setX(rootX + (x * xMult));
             for (int y = 0; y < yMax; y++) {
@@ -196,17 +204,35 @@ public class BigDoor {
                 for (int z = 0; z < zMax; z++) {
                     workingBlock.setZ(rootZ + (z * zMult));
 
-                    Block b = getWorld().getBlockAt(workingBlock);
-                    command.operation(b);
+                    command.operation(workingBlock);
 
                 }
             }
         }
     }
 
+    private void ApplyToAllBlocks(OperateOnBlock command) {
+        if (command == null) return;
+
+        ApplyToAllBlocks((Location location) -> {
+            Block b = getWorld().getBlockAt(location);
+            command.operation(b);
+        });
+    }
+
+    public Map<String, String> SavedBlock = new HashMap<>();
+
     public void Open() {
+        // Save all blocks currently there:
+        ApplyToAllBlocks((Location location) -> {
+            Block b = getWorld().getBlockAt(location);
+            MaterialData md = DoorInterpreter.MaterialDataFromBlock(b);
+            SavedBlock.put(DoorInterpreter.LocationAsString(location),
+                           DoorInterpreter.MaterialAsString(md));
+        });
+
         // Need to check if these blocks are loaded.
-        ApplyToAllBlocks((b) -> b.setType(Material.AIR));
+        ApplyToAllBlocks((Block b) -> b.setType(Material.AIR));
         isOpen = true;
         isModified = true;
         //send "You feel a gust of air" to nearby players. Maybe a whoosh.
@@ -214,7 +240,16 @@ public class BigDoor {
 
     public void Close() {
         // This should definitely change the world!
-        ApplyToAllBlocks((b) -> b.setType(Material.STONE));
+        ApplyToAllBlocks((Location location) -> {
+            Block b = getWorld().getBlockAt(location);
+            String material = SavedBlock.get(DoorInterpreter.LocationAsString(location));
+            MaterialData md = (material == null ?
+                                    new MaterialData(Material.STONE) :
+                                    DoorInterpreter.InterpretMaterial(material));
+            b.setType(md.getItemType());
+            b.setData(md.getData());
+        });
+
         isOpen = false;
         isModified = true;
         // Send "You feel a thud of the ground in your feet" to nearby players.

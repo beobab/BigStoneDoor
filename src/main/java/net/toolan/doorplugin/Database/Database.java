@@ -8,9 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 import net.toolan.doorplugin.AllDoors;
@@ -73,6 +71,20 @@ public abstract class Database {
                             door.Triggers = triggers;
                         }
 
+                        try(PreparedStatement psB = conn.prepareStatement(
+                                "SELECT locationKey, blockKey FROM doorBlock WHERE name = ?;"
+                        )) {
+                            Map<String, String> savedBlocks = new HashMap<>();
+                            psB.setString(1, door.doorName);
+                            try(ResultSet rsB = psB.executeQuery()) {
+                                while (rsB.next()) {
+                                    savedBlocks.put(rsB.getString("locationKey"),
+                                                    rsB.getString("blockKey"));
+                                }
+                            }
+                            door.SavedBlocks = savedBlocks;
+                        }
+
                         lst.add(door);
                     }
                 }
@@ -81,7 +93,28 @@ public abstract class Database {
         return lst;
     }
 
-    public void saveDoor(String name, String owner, String world, String root, String size, String state, String openBlockMaterial, List<String> triggers) {
+    public void deleteDoor(String name) {
+        // Maybe check the owner has permission to do this before doing it...
+        NonQuery((Connection conn) -> {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM door WHERE name = ?;")) {
+                ps.setString(1, name);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM doorTrigger WHERE name = ?;")) {
+                ps.setString(1, name);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM doorBlock WHERE name = ?;")) {
+                ps.setString(1, name);
+                ps.executeUpdate();
+            }
+        });
+    }
+
+    public void saveDoor(String name, String owner, String world, String root, String size, String state, String openBlockMaterial, List<String> triggers, Map<String, String> savedBlocks) {
         NonQuery((Connection conn) -> {
             try (PreparedStatement ps = conn.prepareStatement(
                     "REPLACE INTO door" +
@@ -112,6 +145,25 @@ public abstract class Database {
                 {
                     ps.setString(1, name);
                     ps.setString(2, key);
+                    ps.executeUpdate();
+                }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM doorBlock WHERE name = ?;")) {
+                ps.setString(1, name);
+                ps.executeUpdate();
+            }
+
+            for (String key : savedBlocks.keySet()) {
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO doorBlock" +
+                                " (name, locationKey, blockKey)" +
+                                " VALUES(?,?,?);"))
+                {
+                    ps.setString(1, name);
+                    ps.setString(2, key);
+                    ps.setString(3, savedBlocks.get(key));
                     ps.executeUpdate();
                 }
             }
@@ -163,7 +215,7 @@ public abstract class Database {
                 saveDoor(dc.doorName, dc.owner,
                         dc.worldName, dc.doorRoot, dc.doorSize,
                         dc.state, dc.openBlockMaterial,
-                        dc.Triggers);
+                        dc.Triggers, dc.SavedBlocks);
             }
         }
     }

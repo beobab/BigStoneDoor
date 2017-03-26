@@ -1,10 +1,10 @@
 package net.toolan.doorplugin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class BigDoorStorageClass {
@@ -18,6 +18,7 @@ public class BigDoorStorageClass {
     public String openBlockMaterial;
 
     public List<String> Triggers;
+    public Map<String, String> SavedBlocks;
 
     public BigDoor getDoor(DoorBell doorbell) {
 
@@ -34,6 +35,9 @@ public class BigDoorStorageClass {
                 size
         );
         d.TriggerKeys = Triggers;
+        d.SavedBlock = SavedBlocks;
+
+        d.isOpen = (state.equalsIgnoreCase("OPEN"));
 
         for (String key : Triggers) {
             doorbell.setDoorBell(key, d);
@@ -54,6 +58,7 @@ public class BigDoorStorageClass {
        ds.openBlockMaterial = Material.AIR.toString();
 
        ds.Triggers = door.TriggerKeys;
+       ds.SavedBlocks = door.SavedBlock;
 
        return ds;
    }

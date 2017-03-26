@@ -21,8 +21,6 @@ public class AllDoors {
     //constructor
     public AllDoors() {
         Doors = new ArrayList<BigDoor>();
-//        Doors.add(new BigDoor("mountainway", "LiztherWiz"));
-//        Doors.add(new BigDoor("dragondoors", "Minecraft_101"));
     }
 
     public void DemoDoor(Player player) {
@@ -251,24 +249,14 @@ public class AllDoors {
 
 
     public boolean CreateDoor(CommandSender sender, final CommandArguments parsedArguments) {
-        String owner = "Console";
-
         BigDoor previousDoor = GetBigDoor(parsedArguments.doorName);
         if (previousDoor != null) {
             sender.sendMessage("There is already a door with that name.");
             return false;
         }
 
-
         if (sender instanceof Player) {
             Player player = (Player) sender;
-
-            String facing = getCardinalDirection(player, true);
-            String subFacing = getCardinalDirection(player, false);
-            Bukkit.broadcastMessage("Facing: " + facing);
-            if (facing.equalsIgnoreCase("Up") || facing.equalsIgnoreCase("Down"))
-                Bukkit.broadcastMessage(" (and a bit " + subFacing.toLowerCase() + ")");
-
 
             Location loc = GetLocationInFrontOfPlayer(player);
             String worldName = loc.getWorld().getName();
@@ -276,12 +264,12 @@ public class AllDoors {
             DoorSize doorSize = ConvertDoorSizeFromRightUpIn(player, parsedArguments.doorSize);
 
             BigDoor newDoor = new BigDoor(parsedArguments.doorName, player.getUniqueId(), worldName, loc, doorSize);
-            newDoor.Close();
+            newDoor.Open();
 
             return Doors.add(newDoor);
         }
 
-        sender.sendMessage("Console cannot currently create doors. Enable setting of location.");
+        sender.sendMessage("Console cannot create doors.");
         return false;
     }
 }

@@ -12,10 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jonathan on 24/03/2017.
@@ -29,7 +26,7 @@ public class DoorBell implements Listener {
     }
 
     private Map<String, OperateDoor> _playerOperations = new HashMap<>();
-    private Map<String, List<OperateDoor>> _itemOperations = new HashMap<>();
+    private Map<String, Map<String, OperateDoor>> _itemOperations = new HashMap<>();
 
     private static String PlayerKey(Player p) {
         return (p == null ? "" : p.getName());
@@ -89,16 +86,23 @@ public class DoorBell implements Listener {
 
         // This might hang on to references. It might be better to hang on to names of blocks somehow.
         final String blockKey = BlockKey(b);
-        List<OperateDoor> operations = _itemOperations.get(blockKey);
+        Collection<OperateDoor> operations = _itemOperations.get(blockKey).values();
         if (operations != null)
             for (OperateDoor op : operations)
                 op.operation(e);
     }
 
     public void setDoorBell(String blockKey, BigDoor door) {
-        List<OperateDoor> operateDoors = _itemOperations.get(blockKey);
-        if (operateDoors == null) operateDoors = new ArrayList<>();
-        operateDoors.add(x -> door.Toggle());
+        Map<String, OperateDoor> operateDoors = _itemOperations.get(blockKey);
+        if (operateDoors == null) operateDoors = new HashMap<>();
+        operateDoors.put(door.Name, x -> door.Toggle());
+        _itemOperations.put(blockKey, operateDoors);
+    }
+
+    public void unsetDoorBell(String blockKey, BigDoor door) {
+        Map<String, OperateDoor> operateDoors = _itemOperations.get(blockKey);
+        if (operateDoors == null) operateDoors = new HashMap<>();
+        operateDoors.remove(door.Name);
         _itemOperations.put(blockKey, operateDoors);
     }
 
@@ -111,6 +115,22 @@ public class DoorBell implements Listener {
 
             setDoorBell(BlockKey(b), door);
             e.getPlayer().sendMessage("This will now open and close door: " + door.Name);
+
+            // remove this op.
+            _playerOperations.remove(playerKey);
+        };
+        _playerOperations.put(playerKey, setTriggerOnDoor);
+    }
+
+    public void NextPlayerClickUnSetsDoorbell(Player player, BigDoor door){
+        final String playerKey = PlayerKey(player);
+
+        OperateDoor setTriggerOnDoor = (PlayerInteractEvent e) -> {
+            Block b = e.getClickedBlock();
+            door.RemoveTrigger(BlockKey(b));
+
+            unsetDoorBell(BlockKey(b), door);
+            e.getPlayer().sendMessage("This will no longer open and close door: " + door.Name);
 
             // remove this op.
             _playerOperations.remove(playerKey);

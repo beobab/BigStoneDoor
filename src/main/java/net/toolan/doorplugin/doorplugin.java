@@ -2,6 +2,7 @@ package net.toolan.doorplugin;
 
 /**
  * Created by jonathan on 16/03/2017.
+ * Main entry-point to the plugin. Accepts the standard door command.
  */
 
 import net.toolan.doorplugin.Database.Database;
@@ -110,6 +111,17 @@ public final class doorplugin extends JavaPlugin {
                     sender.sendMessage("Unable to create Door named " + parsedArgs.doorName + ".");
             }
 
+            else if (subCmd == DoorSubCommand.Delete) {
+                BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
+                if (d != null) {
+                    getSqlDatabase().deleteDoor(parsedArgs.doorName);
+                    _allDoors.Doors.remove(d);
+                    sender.sendMessage("Door " + parsedArgs.doorName + " created.");
+                } else {
+                    sender.sendMessage("Unable to delete Door named " + parsedArgs.doorName + ".");
+                }
+            }
+
             else if (subCmd == DoorSubCommand.Open) {
                 BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
                 if (d == null)
@@ -130,7 +142,17 @@ public final class doorplugin extends JavaPlugin {
                 }
             }
 
-            else if (subCmd == DoorSubCommand.SetTrigger) {
+            else if (subCmd == DoorSubCommand.Trigger) {
+                BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
+                if (d == null)
+                    sender.sendMessage("Unable to find a door named " + parsedArgs.doorName + ".");
+                else {
+                    getDoorBell().NextPlayerClickSetsDoorbell(player, d);
+                    sender.sendMessage("Activate a button, lever or plate to set the trigger for door: " + parsedArgs.doorName);
+                }
+            }
+
+            else if (subCmd == DoorSubCommand.DeleteTrigger) {
                 BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
                 if (d == null)
                     sender.sendMessage("Unable to find a door named " + parsedArgs.doorName + ".");
@@ -145,6 +167,13 @@ public final class doorplugin extends JavaPlugin {
 
         return false;
     }
+
+    void Help(String[] args) {
+        String explain = "/door is a command to allow you to create a huge stone doorway which can be opened by a button or lever without the use of redstone.";
+
+
+    }
+
 }
 
 

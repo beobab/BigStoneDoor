@@ -3,6 +3,7 @@ package net.toolan.doorplugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 
@@ -56,17 +57,37 @@ public class DoorInterpreter {
         );
     }
 
+    public static DoorSize InterpretSize(String doorSize) {
+        String[] args = doorSize.split(",");
+        return new DoorSize(Integer.parseInt(args[0]),
+                Integer.parseInt(args[1]),
+                Integer.parseInt(args[2]));
+    }
+
+    @SuppressWarnings("deprecation")
+    public static MaterialData MaterialDataFromBlock(Block b) {
+        Material m = b.getType();
+        byte data = b.getData();
+        if (data > 0)
+            return new MaterialData(m, data);
+        else
+            return new MaterialData(m);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static String MaterialAsString(MaterialData md) {
+        String m = md.getItemType().toString();
+        byte b = md.getData();
+        if (b > 0)
+            return m + "," + Byte.toString(b);
+        else
+            return m;
+    }
+
     public static String LocationAsString(Location loc) {
         return Integer.toString(loc.getBlockX()) + "," +
                 Integer.toString(loc.getBlockY()) + "," +
                 Integer.toString(loc.getBlockZ());
-    }
-
-    public static DoorSize InterpretSize(String doorSize) {
-        String[] args = doorSize.split(",");
-        return new DoorSize(Integer.parseInt(args[0]),
-                            Integer.parseInt(args[1]),
-                            Integer.parseInt(args[2]));
     }
 
     public static String DoorSizeAsString(DoorSize doorSize) {

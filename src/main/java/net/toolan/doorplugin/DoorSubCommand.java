@@ -8,18 +8,19 @@ import java.util.List;
  */
 public enum DoorSubCommand {
     Create,
-    Demo,
-    Open,
     Close,
-    Location,
-    Size,
-    Style,
-    Direction,
-    Delay,
-    Info,
-    List,
+//    Delay,
     Delete,
-    SetTrigger,
+    DeleteTrigger,
+    Demo,
+//    Direction,
+    Info,
+//    Location,
+    List,
+    Open,
+//    Size,
+//    Style,
+    Trigger,
     Usage
 
     ;
@@ -37,10 +38,12 @@ public enum DoorSubCommand {
         if (MatchesCommand(args, "demo", 1)) return DoorSubCommand.Demo;
         if (MatchesCommand(args, "list", 1)) return DoorSubCommand.List;
         if (MatchesCommand(args, "open", 2)) return DoorSubCommand.Open;
+        if (MatchesCommand(args, "delete", 2)) return DoorSubCommand.Delete;
+        if (MatchesCommand(args, "deleteTrigger", 2)) return DoorSubCommand.DeleteTrigger;
         if (MatchesCommand(args, "close", 2)) return DoorSubCommand.Close;
         if (MatchesCommand(args, "info", 2)) return DoorSubCommand.Info;
         if (MatchesCommand(args, "create", 2)) return DoorSubCommand.Create;
-        if (MatchesCommand(args, "trigger", 1)) return DoorSubCommand.SetTrigger;
+        if (MatchesCommand(args, "trigger", 1)) return DoorSubCommand.Trigger;
 
         return DoorSubCommand.Usage;
     }
@@ -49,16 +52,6 @@ public enum DoorSubCommand {
 
         if (subCommand == DoorSubCommand.List) {
             return new CommandArguments();
-        }
-
-        else if (subCommand == DoorSubCommand.Info
-                || subCommand == DoorSubCommand.Open
-                || subCommand == DoorSubCommand.Close
-                || subCommand == DoorSubCommand.SetTrigger) {
-            final String aName = ArgumentAt(args, 1, "" );
-            return new CommandArguments() {{
-                doorName = aName;
-            }};
         }
 
         else if (subCommand == DoorSubCommand.Create) {
@@ -74,7 +67,13 @@ public enum DoorSubCommand {
             }};
         }
 
-        return new CommandArguments();
+        // If that wasn't mentioned, then it takes one argument. The door name. This seems to be a common pattern.
+        else {
+            final String aName = ArgumentAt(args, 1, "" );
+            return new CommandArguments() {{
+                doorName = aName;
+            }};
+        }
     }
 
     private static boolean MatchesCommand(String[] args, String name, int minimumNumberOfArguments) {

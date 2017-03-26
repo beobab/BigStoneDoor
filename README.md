@@ -68,9 +68,16 @@ Door which you can set size.
 Door which you can trigger from a button.  
 /door demo vanish  
 
+/door help [1-X]
+Usage: /door create door1 2 3
+       /door open door1
+       /door close door1
+       
+
+
 STAGE 1:
 --------
-Door which has uses already existing blocks.  
+Door which uses already existing blocks.  
 Door which you can change the empty block.  
 Door which you can set to slide up.  
 Door which you can change the delay  
@@ -92,3 +99,8 @@ STAGE 4:
 --------
 Door which you can set to open like a drawbridge.  
 /door demo drawbridge  
+
+STAGE 5:
+--------
+Doors which cost some commodity, such as redstone, per block.
+Maybe Vault integration.
