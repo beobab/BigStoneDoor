@@ -116,6 +116,7 @@ public final class doorplugin extends JavaPlugin {
                 if (d != null) {
                     getSqlDatabase().deleteDoor(parsedArgs.doorName);
                     _allDoors.Doors.remove(d);
+                    getDoorBell().unsetDoorBell(d.Name);
                     sender.sendMessage("Door " + parsedArgs.doorName + " created.");
                 } else {
                     sender.sendMessage("Unable to delete Door named " + parsedArgs.doorName + ".");

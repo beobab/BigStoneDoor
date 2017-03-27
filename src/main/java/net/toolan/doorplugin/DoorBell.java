@@ -99,11 +99,17 @@ public class DoorBell implements Listener {
         _itemOperations.put(blockKey, operateDoors);
     }
 
+    public void unsetDoorBell(BigDoor door) {
+        for (Map<String, OperateDoor> operateDoors : _itemOperations.values()) {
+            if (operateDoors != null)
+                operateDoors.remove(door.Name);
+        }
+    }
+
     public void unsetDoorBell(String blockKey, BigDoor door) {
         Map<String, OperateDoor> operateDoors = _itemOperations.get(blockKey);
-        if (operateDoors == null) operateDoors = new HashMap<>();
-        operateDoors.remove(door.Name);
-        _itemOperations.put(blockKey, operateDoors);
+        if (operateDoors == null)
+            operateDoors.remove(door.Name);
     }
 
     public void NextPlayerClickSetsDoorbell(Player player, BigDoor door){
