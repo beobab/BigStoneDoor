@@ -1,6 +1,14 @@
 BigStoneDoor Plugin
 ===================
 
+/door create [x [y [name]]] 
+
+name defaults to username_door_1
+x defaults to 4, y defaults to 5
+automatically run /door trigger, so that the next thing they activate opens the door.
+Need a way to cancel this: maybe click on a normal block. Give them the command to re-try.
+
+
 /door create <name> [location [size]]  
 /door location x y z  
 /door size x y z (one of these must be 1, max is 50)  
