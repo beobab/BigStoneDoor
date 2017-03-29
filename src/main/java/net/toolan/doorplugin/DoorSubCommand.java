@@ -7,6 +7,7 @@ import java.util.List;
  * Created by jonathan on 23/03/2017.
  */
 public enum DoorSubCommand {
+    CancelTrigger,
     Create,
     Close,
 //    Delay,
@@ -21,9 +22,7 @@ public enum DoorSubCommand {
 //    Size,
 //    Style,
     Trigger,
-    Usage
-
-    ;
+    Usage;
 
     public static java.util.List<String> SubCommandNameList() {
         java.util.List<String> lst = new ArrayList<>();
@@ -35,6 +34,7 @@ public enum DoorSubCommand {
 
     public static DoorSubCommand GetSubCommand(String[] args) {
         if (args.length == 0) return DoorSubCommand.Usage;
+        if (MatchesCommand(args, "cancelTrigger", 1)) return DoorSubCommand.CancelTrigger;
         if (MatchesCommand(args, "demo", 1)) return DoorSubCommand.Demo;
         if (MatchesCommand(args, "list", 1)) return DoorSubCommand.List;
         if (MatchesCommand(args, "open", 2)) return DoorSubCommand.Open;
@@ -50,7 +50,7 @@ public enum DoorSubCommand {
 
     public static CommandArguments ParseArguments(final String[] args, DoorSubCommand subCommand) {
 
-        if (subCommand == DoorSubCommand.List) {
+        if (subCommand == DoorSubCommand.List | subCommand == DoorSubCommand.CancelTrigger) {
             return new CommandArguments();
         }
 

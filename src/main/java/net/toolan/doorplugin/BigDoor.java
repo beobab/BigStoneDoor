@@ -172,6 +172,25 @@ public class BigDoor {
             Open();
     }
 
+    public boolean isAirDoor() {
+        if (isOpen) {
+            for (String value : SavedBlock.values())
+                if (DoorInterpreter.InterpretMaterial(value).getItemType() != Material.AIR)
+                    return false;
+            return true;
+        } else {
+            List<Material> lst = new ArrayList<>();
+            ApplyToAllBlocks((Block b) -> lst.add(b.getType()));
+            for (Material m : lst)
+                if (m != Material.AIR)
+                    return false;
+            return true;
+        }
+    }
+    public void FillWithLeaves() {
+        ApplyToAllBlocks((Block b) -> b.setType(Material.LEAVES));
+    }
+
     interface OperateOnBlock {
         void operation(Block b);
     }
@@ -223,6 +242,8 @@ public class BigDoor {
     public Map<String, String> SavedBlock = new HashMap<>();
 
     public void Open() {
+        if (isOpen) return;
+
         // Save all blocks currently there:
         ApplyToAllBlocks((Location location) -> {
             Block b = getWorld().getBlockAt(location);
@@ -239,6 +260,8 @@ public class BigDoor {
     }
 
     public void Close() {
+        if (!isOpen) return;
+
         // This should definitely change the world!
         ApplyToAllBlocks((Location location) -> {
             Block b = getWorld().getBlockAt(location);
@@ -249,6 +272,9 @@ public class BigDoor {
             b.setType(md.getItemType());
             b.setData(md.getData());
         });
+
+        // To save space, don't remember this list whilst it's closed.
+        SavedBlock.clear();
 
         isOpen = false;
         isModified = true;

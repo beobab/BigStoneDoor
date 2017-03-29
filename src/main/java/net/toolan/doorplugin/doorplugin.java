@@ -82,18 +82,32 @@ public final class doorplugin extends JavaPlugin {
 
             CommandArguments parsedArgs = DoorSubCommand.ParseArguments(args, subCmd);
             if (parsedArgs == null) {
-                sender.sendMessage("No arguments!");
                 return false;
             }
 
-            if (subCmd == DoorSubCommand.Demo) {
+            if (subCmd == DoorSubCommand.Create) {
+                CreateDoorCommand(player, subCmd, parsedArgs);
+            }
+
+            else if (subCmd == DoorSubCommand.Demo) {
                 if (player != null)
                     _allDoors.DemoDoor(player);
             }
 
-            if (subCmd == DoorSubCommand.List) {
+            else if (subCmd == DoorSubCommand.List) {
                 sender.sendMessage(_allDoors.ListDoors());
             }
+
+            else if (subCmd == DoorSubCommand.CancelTrigger) {
+                DoorBell bell = getDoorBell();
+                if (!bell.hasPlayerKey(player))
+                    sender.sendMessage("You have nothing to cancel.");
+                else {
+                    getDoorBell().CancelPlayerClick(player);
+                    sender.sendMessage("Activation cancelled.");
+                }
+            }
+
 
             else if (subCmd == DoorSubCommand.Info) {
                 BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
@@ -103,23 +117,17 @@ public final class doorplugin extends JavaPlugin {
                     sender.sendMessage("No such door!");
             }
 
-
-            else if (subCmd == DoorSubCommand.Create) {
-                if (_allDoors.CreateDoor(sender, parsedArgs))
-                    sender.sendMessage("Door " + parsedArgs.doorName + " created.");
-                else
-                    sender.sendMessage("Unable to create Door named " + parsedArgs.doorName + ".");
-            }
-
             else if (subCmd == DoorSubCommand.Delete) {
                 BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
                 if (d != null) {
+                    if (d.isOpen) d.Close();
+
                     getSqlDatabase().deleteDoor(parsedArgs.doorName);
                     _allDoors.Doors.remove(d);
-                    getDoorBell().unsetDoorBell(d.Name);
-                    sender.sendMessage("Door " + parsedArgs.doorName + " created.");
+                    getDoorBell().unsetDoorBell(d);
+                    sender.sendMessage("Door " + parsedArgs.doorName + " deleted.");
                 } else {
-                    sender.sendMessage("Unable to delete Door named " + parsedArgs.doorName + ".");
+                    sender.sendMessage("Unable to delete door named " + parsedArgs.doorName + ".");
                 }
             }
 
@@ -150,6 +158,7 @@ public final class doorplugin extends JavaPlugin {
                 else {
                     getDoorBell().NextPlayerClickSetsDoorbell(player, d);
                     sender.sendMessage("Activate a button, lever or plate to set the trigger for door: " + parsedArgs.doorName);
+                    sender.sendMessage("-- To cancel, use: /door cancelTrigger");
                 }
             }
 
@@ -158,15 +167,40 @@ public final class doorplugin extends JavaPlugin {
                 if (d == null)
                     sender.sendMessage("Unable to find a door named " + parsedArgs.doorName + ".");
                 else {
-                    getDoorBell().NextPlayerClickSetsDoorbell(player, d);
+                    getDoorBell().NextPlayerClickUnSetsDoorbell(player, d);
                     sender.sendMessage("Activate a button, lever or plate to set the trigger for door: " + parsedArgs.doorName);
                 }
             }
 
+            // Didn't match any commands we recognised.
+            else { return false; }
+
+            // Successfully processed at least one of them.
             return true;
         }
 
         return false;
+    }
+
+    void CreateDoorCommand(Player player, DoorSubCommand subCmd, CommandArguments parsedArgs) {
+        if (_allDoors.CreateDoor(player, parsedArgs)) {
+            player.sendMessage("Door " + parsedArgs.doorName + " created.");
+
+            BigDoor d = _allDoors.GetBigDoor(parsedArgs.doorName);
+
+            if (d.isAirDoor()) {
+                player.sendMessage("No blocks where you want a door. I'm filling it with leaves so you can find it.");
+                d.Close();
+                d.FillWithLeaves();
+            }
+
+            getDoorBell().NextPlayerClickSetsDoorbell(player, d);
+            player.sendMessage("Activate a button, lever or plate to set the trigger for your new door: " + parsedArgs.doorName);
+            player.sendMessage("-- To cancel, use: /door cancelTrigger");
+
+        } else {
+            player.sendMessage("Unable to create Door named " + parsedArgs.doorName + ".");
+        }
     }
 
     void Help(String[] args) {

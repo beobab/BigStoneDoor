@@ -240,10 +240,9 @@ public class AllDoors {
             }
         }
 
-        Bukkit.broadcastMessage(result.toString());
         if (result != null) return result;
 
-        Bukkit.broadcastMessage("Dunno what to do. Returning original.");
+        // Unable to determine what to do. Returning original...
         return original;
     }
 

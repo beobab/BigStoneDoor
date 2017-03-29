@@ -21,6 +21,10 @@ import java.util.*;
  */
 public class DoorBell implements Listener {
 
+    public boolean hasPlayerKey(Player player) {
+        return _playerOperations.containsKey(PlayerKey(player));
+    }
+
     interface OperateDoor {
         void operation(PlayerInteractEvent e);
     }
@@ -86,9 +90,9 @@ public class DoorBell implements Listener {
 
         // This might hang on to references. It might be better to hang on to names of blocks somehow.
         final String blockKey = BlockKey(b);
-        Collection<OperateDoor> operations = _itemOperations.get(blockKey).values();
+        Map<String, OperateDoor> operations = _itemOperations.get(blockKey);
         if (operations != null)
-            for (OperateDoor op : operations)
+            for (OperateDoor op : operations.values())
                 op.operation(e);
     }
 
@@ -110,6 +114,12 @@ public class DoorBell implements Listener {
         Map<String, OperateDoor> operateDoors = _itemOperations.get(blockKey);
         if (operateDoors == null)
             operateDoors.remove(door.Name);
+    }
+
+    public void CancelPlayerClick(Player player) {
+        final String playerKey = PlayerKey(player);
+
+        _playerOperations.remove(playerKey);
     }
 
     public void NextPlayerClickSetsDoorbell(Player player, BigDoor door){
