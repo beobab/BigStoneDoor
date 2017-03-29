@@ -51,63 +51,7 @@ public class BigDoor {
         isModified = true;
     }
 
-    /*
-    public String CurrentDoorMaterial() {
-        // start in one corner, and loop through trying to find the biggest chunk of the same material. Data counts as different material.
 
-        String doorBlocks = "DOOR:\n";
-        for (Block block : GetDoorBlocks()) {
-            doorBlocks += "  " + this.SerialiseBlock(block) + "\n";
-        }
-        if (TriggerKeys != null) {
-            //doorBlocks += "TRIGGER:\n";
-            //doorBlocks += "  " + this.SerialiseBlock(TriggerKeys);
-        }
-        String result = StringCompressor.crunch(doorBlocks);
-
-        Bukkit.broadcastMessage("DoorMaterial: " + result);
-        return result;
-    }
-
-    private List<Block> GetDoorBlocks() {
-        List<Block> lst = new ArrayList<>();
-        ApplyToAllBlocks(lst::add);
-        return lst;
-    }
-
-    @SuppressWarnings("deprecation")
-    public String SerialiseBlock(Block b) {
-        Location l = b.getLocation();
-        String location =
-                Integer.toString(l.getBlockX()) + "," +
-                Integer.toString(l.getBlockY()) + "," +
-                Integer.toString(l.getBlockZ());
-
-        Material m = b.getType();
-        Byte data = b.getData();
-        return location + "|" + m.toString() + (data > 0 ? "," + data.toString() : "");
-    }
-
-    @SuppressWarnings("deprecation")
-    public BlockInfo DeserialiseBlock(World w, String s) {
-        String args[] = s.split("\\|");
-
-        final Location l = DoorInterpreter.InterpretLocation(w, args[0]);
-        final MaterialData md = DoorInterpreter.InterpretMaterial(args[1]);
-
-        return new BlockInfo(l, md);
-    }
-
-
-    class BlockInfo {
-        public Location location;
-        public MaterialData materialData;
-        BlockInfo (Location l, MaterialData md) {
-            location = l;
-            materialData = md;
-        }
-    }
-*/
     public void AddTrigger(String s) {
         TriggerKeys.add(s);
         isModified = true;
@@ -165,12 +109,12 @@ public class BigDoor {
 //                "Deny List   : (no-one)";
     }
 
-    public void Toggle() {
-        if (isOpen)
-            Close();
-        else
-            Open();
-    }
+//    public void Toggle() {
+//        if (isOpen)
+//            Close();
+//        else
+//            Open();
+//    }
 
     public boolean isAirDoor() {
         if (isOpen) {
@@ -240,45 +184,122 @@ public class BigDoor {
     }
 
     public Map<String, String> SavedBlock = new HashMap<>();
+    public String SavedDefaultBlock = null;
+
+    public void Toggle() {
+        // Save what is currently in the world.
+        Map<String, String> currentBlocks = ReadMapFromWorld();
+        String mostFrequentCurrent = MostFrequentlyHashed(currentBlocks);
+        RemoveValueFromHash(currentBlocks, mostFrequentCurrent);
+
+
+        // This should only be null on first open, but in case not, use sensible defaults.
+        if (SavedDefaultBlock == null)
+            SavedDefaultBlock = DoorInterpreter.MaterialAsString(
+                    isOpen ? new MaterialData(Material.STONE) : new MaterialData(Material.AIR)
+            );
+
+        SetMapToWorld(SavedBlock, SavedDefaultBlock);
+
+        // Now we have written the saved one to the world, save what we previously had in variables.
+        SavedDefaultBlock = mostFrequentCurrent;
+        SavedBlock = currentBlocks;
+
+        isOpen = !isOpen;
+        isModified = true;
+    }
+
+    // Set the map to the world, but if there isn't an entry, assume it's the default block.
+    // On first open, there will be no entries in map, so all will be set to Material.AIR.
+    private void SetMapToWorld(Map<String, String> map, String defaultBlock) {
+        ApplyToAllBlocks((Location location) -> {
+            Block b = getWorld().getBlockAt(location);
+            String material = map.get(DoorInterpreter.LocationAsString(location));
+            if (material == null)
+                material = defaultBlock;
+            MaterialData md = DoorInterpreter.InterpretMaterial(material);
+            b.setType(md.getItemType());
+            b.setData(md.getData());
+        });
+    }
+
+    private Map<String, String> ReadMapFromWorld() {
+        Map<String, String> currentBlocks = new HashMap<>();
+        ApplyToAllBlocks((Location location) -> {
+            Block b = getWorld().getBlockAt(location);
+            MaterialData md = DoorInterpreter.MaterialDataFromBlock(b);
+            currentBlocks.put(
+                    DoorInterpreter.LocationAsString(location),
+                    DoorInterpreter.MaterialAsString(md)
+            );
+        });
+        return currentBlocks;
+    }
+
+    private void RemoveValueFromHash(Map<String, String> map, String value) {
+        map.values().removeIf(val -> value.equals(val));
+    }
+
+    private String MostFrequentlyHashed(Map<String, String> map) {
+        Integer occurences = 0;
+        String mostFrequent = "";
+        Map<String, Integer>reverseHash = new HashMap<>();
+        for(String item : map.values()) {
+            Integer itemCount = reverseHash.get(item);
+            itemCount = (itemCount == null ? 0 : itemCount) + 1;
+            if (itemCount > occurences) {
+                occurences = itemCount;
+                mostFrequent = item;
+            }
+            reverseHash.put(item, itemCount);
+        }
+        return mostFrequent;
+    }
 
     public void Open() {
         if (isOpen) return;
 
-        // Save all blocks currently there:
-        ApplyToAllBlocks((Location location) -> {
-            Block b = getWorld().getBlockAt(location);
-            MaterialData md = DoorInterpreter.MaterialDataFromBlock(b);
-            SavedBlock.put(DoorInterpreter.LocationAsString(location),
-                           DoorInterpreter.MaterialAsString(md));
-        });
+        Toggle();
 
-        // Need to check if these blocks are loaded.
-        ApplyToAllBlocks((Block b) -> b.setType(Material.AIR));
-        isOpen = true;
-        isModified = true;
-        //send "You feel a gust of air" to nearby players. Maybe a whoosh.
+        return;
+//        // Save all blocks currently there:
+//        ApplyToAllBlocks((Location location) -> {
+//            Block b = getWorld().getBlockAt(location);
+//            MaterialData md = DoorInterpreter.MaterialDataFromBlock(b);
+//            SavedBlock.put(DoorInterpreter.LocationAsString(location),
+//                           DoorInterpreter.MaterialAsString(md));
+//        });
+//
+//        // Need to check if these blocks are loaded.
+//        ApplyToAllBlocks((Block b) -> b.setType(Material.AIR));
+//        isOpen = true;
+//        isModified = true;
+//        //send "You feel a gust of air" to nearby players. Maybe a whoosh.
     }
 
     public void Close() {
         if (!isOpen) return;
 
-        // This should definitely change the world!
-        ApplyToAllBlocks((Location location) -> {
-            Block b = getWorld().getBlockAt(location);
-            String material = SavedBlock.get(DoorInterpreter.LocationAsString(location));
-            MaterialData md = (material == null ?
-                                    new MaterialData(Material.STONE) :
-                                    DoorInterpreter.InterpretMaterial(material));
-            b.setType(md.getItemType());
-            b.setData(md.getData());
-        });
+        Toggle();
+        return;
 
-        // To save space, don't remember this list whilst it's closed.
-        SavedBlock.clear();
-
-        isOpen = false;
-        isModified = true;
-        // Send "You feel a thud of the ground in your feet" to nearby players.
+//        // This should definitely change the world!
+//        ApplyToAllBlocks((Location location) -> {
+//            Block b = getWorld().getBlockAt(location);
+//            String material = SavedBlock.get(DoorInterpreter.LocationAsString(location));
+//            MaterialData md = (material == null ?
+//                                    new MaterialData(Material.STONE) :
+//                                    DoorInterpreter.InterpretMaterial(material));
+//            b.setType(md.getItemType());
+//            b.setData(md.getData());
+//        });
+//
+//        // To save space, don't remember this list whilst it's closed.
+//        SavedBlock.clear();
+//
+//        isOpen = false;
+//        isModified = true;
+//        // Send "You feel a thud of the ground in your feet" to nearby players.
     }
 
 }

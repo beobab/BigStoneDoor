@@ -36,6 +36,7 @@ public class BigDoorStorageClass {
         );
         d.TriggerKeys = Triggers;
         d.SavedBlock = SavedBlocks;
+        d.SavedDefaultBlock = openBlockMaterial;
 
         d.isOpen = (state.equalsIgnoreCase("OPEN"));
 
@@ -55,7 +56,8 @@ public class BigDoorStorageClass {
        ds.doorRoot = DoorInterpreter.LocationAsString(door.getRoot());
 
        ds.state = door.isOpen ? "OPEN" : "CLOSED";
-       ds.openBlockMaterial = Material.AIR.toString();
+       ds.openBlockMaterial = door.SavedDefaultBlock;
+//       ds.openBlockMaterial = Material.AIR.toString();
 
        ds.Triggers = door.TriggerKeys;
        ds.SavedBlocks = door.SavedBlock;
